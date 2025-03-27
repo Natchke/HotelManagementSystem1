@@ -30,7 +30,6 @@ namespace HotelManagement.Repository.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -186,7 +185,7 @@ namespace HotelManagement.Repository.Migrations
                         column: x => x.ManagerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -231,37 +230,37 @@ namespace HotelManagement.Repository.Migrations
                         column: x => x.GuestId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Reservations_Rooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "Rooms",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "HotelReservations",
                 columns: table => new
                 {
-                    HotelId = table.Column<int>(type: "int", nullable: false),
-                    ReservationId = table.Column<int>(type: "int", nullable: false)
+                    HotelsId = table.Column<int>(type: "int", nullable: false),
+                    ReservationsId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_HotelReservations", x => new { x.HotelId, x.ReservationId });
+                    table.PrimaryKey("PK_HotelReservations", x => new { x.HotelsId, x.ReservationsId });
                     table.ForeignKey(
-                        name: "FK_HotelReservations_Hotels_HotelId",
-                        column: x => x.HotelId,
+                        name: "FK_HotelReservations_Hotels_HotelsId",
+                        column: x => x.HotelsId,
                         principalTable: "Hotels",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_HotelReservations_Reservations_ReservationId",
-                        column: x => x.ReservationId,
+                        name: "FK_HotelReservations_Reservations_ReservationsId",
+                        column: x => x.ReservationsId,
                         principalTable: "Reservations",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -304,9 +303,9 @@ namespace HotelManagement.Repository.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_HotelReservations_ReservationId",
+                name: "IX_HotelReservations_ReservationsId",
                 table: "HotelReservations",
-                column: "ReservationId");
+                column: "ReservationsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Hotels_ManagerId",

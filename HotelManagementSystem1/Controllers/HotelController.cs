@@ -19,7 +19,7 @@ namespace HotelManagementSystem1.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateHotel([FromBody] HotelForCreatingDto dto)
         {
             await _hotelService.AddHotelAsync(dto);

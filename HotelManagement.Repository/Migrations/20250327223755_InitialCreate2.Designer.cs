@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelManagement.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250327221407_InitialCreate2")]
+    [Migration("20250327223755_InitialCreate2")]
     partial class InitialCreate2
     {
         /// <inheritdoc />
@@ -48,10 +48,6 @@ namespace HotelManagement.Repository.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -205,15 +201,15 @@ namespace HotelManagement.Repository.Migrations
 
             modelBuilder.Entity("HotelReservations", b =>
                 {
-                    b.Property<int>("HotelId")
+                    b.Property<int>("HotelsId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReservationId")
+                    b.Property<int>("ReservationsId")
                         .HasColumnType("int");
 
-                    b.HasKey("HotelId", "ReservationId");
+                    b.HasKey("HotelsId", "ReservationsId");
 
-                    b.HasIndex("ReservationId");
+                    b.HasIndex("ReservationsId");
 
                     b.ToTable("HotelReservations", (string)null);
                 });
@@ -411,7 +407,7 @@ namespace HotelManagement.Repository.Migrations
                     b.HasOne("HotelManagement.Models.Entities.Manager", "Manager")
                         .WithOne("Hotel")
                         .HasForeignKey("HotelManagement.Models.Entities.Hotel", "ManagerId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Manager");
                 });
@@ -421,13 +417,13 @@ namespace HotelManagement.Repository.Migrations
                     b.HasOne("HotelManagement.Models.Entities.Guest", "Guest")
                         .WithMany("Reservations")
                         .HasForeignKey("GuestId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HotelManagement.Models.Entities.Room", "Room")
                         .WithMany("Reservations")
                         .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Guest");
@@ -450,14 +446,14 @@ namespace HotelManagement.Repository.Migrations
                 {
                     b.HasOne("HotelManagement.Models.Entities.Hotel", null)
                         .WithMany()
-                        .HasForeignKey("HotelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("HotelsId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HotelManagement.Models.Entities.Reservation", null)
                         .WithMany()
-                        .HasForeignKey("ReservationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ReservationsId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

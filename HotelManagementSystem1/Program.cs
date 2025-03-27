@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace HotelManagementSystem1
 {
@@ -22,8 +23,36 @@ namespace HotelManagementSystem1
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "HotelManagement API", Version = "v1" });
+
+                // Add JWT Bearer authentication to Swagger UI
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter a valid token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
+            });
+
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
 
             // Register DbContext
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -72,6 +101,17 @@ namespace HotelManagementSystem1
                     ClockSkew = TimeSpan.Zero
                 };
             });
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdminRole", policy =>
+                    policy.RequireRole("Admin"));
+
+                options.AddPolicy("RequireManagerRole", policy =>
+                    policy.RequireRole("Manager"));
+
+                options.AddPolicy("RequireGuestRole", policy =>
+                    policy.RequireRole("Guest"));
+            });
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
@@ -106,8 +146,10 @@ namespace HotelManagementSystem1
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
 
             app.UseAuthorization();
+
 
 
             app.MapControllers();
