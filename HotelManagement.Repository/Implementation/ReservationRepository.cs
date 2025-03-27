@@ -19,6 +19,7 @@ namespace HotelManagement.Repository.Implementation
         }
 
         public async Task<Reservation> GetByIdAsync(int id) => await _context.Reservations.FindAsync(id);
+       
 
         public async Task<bool> IsRoomAvailable(int roomId, DateTime checkIn, DateTime checkOut)
         {
@@ -30,40 +31,51 @@ namespace HotelManagement.Repository.Implementation
             );
         }
 
-        public async Task<IEnumerable<Reservation>> SearchAsync(int? hotelId, int? guestId, int? roomId, DateTime? from, DateTime? to, bool? active)
+        public async Task<IEnumerable<Reservation>> SearchAsync(int? hotelId, string guestId, int? roomId, DateTime? from, DateTime? to, bool? active)
         {
             var query = _context.Reservations
                 .Include(r => r.Room)
+                    .ThenInclude(room => room.Hotel) // Ensure Hotel is loaded
                 .Include(r => r.Guest)
                 .AsQueryable();
 
             if (hotelId.HasValue)
-                query = query.Where(r => r.Room.HotelId == hotelId);
+                query = query.Where(r => r.Room != null && r.Room.HotelId == hotelId);
 
-            if (guestId.HasValue)
+            if (!string.IsNullOrEmpty(guestId))
                 query = query.Where(r => r.GuestId == guestId);
 
             if (roomId.HasValue)
                 query = query.Where(r => r.RoomId == roomId);
 
             if (from.HasValue)
-                query = query.Where(r => r.CheckInDate >= from);
+                query = query.Where(r => r.CheckInDate >= from.Value);
 
             if (to.HasValue)
-                query = query.Where(r => r.CheckOutDate <= to);
+                query = query.Where(r => r.CheckOutDate <= to.Value);
 
             if (active.HasValue)
             {
                 var today = DateTime.Today;
                 query = active.Value
-                    ? query.Where(r => r.CheckOutDate >= today)
-                    : query.Where(r => r.CheckOutDate < today);
+                    ? query.Where(r => r.CheckOutDate >= today) // Active reservations
+                    : query.Where(r => r.CheckOutDate < today); // Inactive reservations
             }
 
-            return await query.ToListAsync();
+            // Log the SQL query for debugging
+            Console.WriteLine(query.ToQueryString());
+
+            var results = await query.ToListAsync();
+
+            Console.WriteLine($"Found {results.Count} reservations.");
+
+            return results;
         }
+
 
         public async Task SaveAsync() => await _context.SaveChangesAsync();
 
     }
+
 }
+

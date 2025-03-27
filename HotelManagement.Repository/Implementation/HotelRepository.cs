@@ -23,8 +23,8 @@ namespace HotelManagement.Repository.Implementation
         
         public async Task AddAsync(Hotel hotel)
         {
-            await base.AddAsync(hotel); // from BaseRepository
-            await base.Save();          // from BaseRepository
+            await base.AddAsync(hotel); 
+            await base.Save();          
         }
 
        
@@ -55,10 +55,13 @@ namespace HotelManagement.Repository.Implementation
 
         public async Task<Hotel> GetByIdAsync(int id)
         {
+           
             return await _context.Hotels
-                .Include(h => h.Rooms)
                 .Include(h => h.Manager)
-                .Include(h => h.Reservations)
+                .Include(h => h.Rooms)
+                    .ThenInclude(r => r.Reservations)
+                        .ThenInclude(res => res.Guest)
+                
                 .FirstOrDefaultAsync(h => h.Id == id);
         }
 
@@ -67,20 +70,35 @@ namespace HotelManagement.Repository.Implementation
         {
             var hotel = await _context.Hotels
                 .Include(h => h.Rooms)
-                .Include(h => h.Reservations)
+                    .ThenInclude(r => r.Reservations)
                 .FirstOrDefaultAsync(h => h.Id == id);
 
             if (hotel == null)
-                return false;
+            {
+                return false; 
+            }
 
+           
             bool hasActiveRooms = hotel.Rooms?.Any(r => r.IsAvailable) ?? false;
-            bool hasActiveReservations = hotel.Reservations?.Any(r => r.IsAvailable) ?? false;
+
+           
+            bool hasActiveReservations = hotel.Rooms?
+                .SelectMany(r => r.Reservations)
+                .Any(r => r.IsAvailable) ?? false;
 
             if (hasActiveRooms || hasActiveReservations)
-                return false;
+            {
+                return false; 
+            }
 
-            base.Remove(hotel); 
-            await base.Save();  
+            
+            if (hotel.Rooms != null)
+            {
+                _context.Rooms.RemoveRange(hotel.Rooms);
+            }
+
+            _context.Hotels.Remove(hotel);
+            await _context.SaveChangesAsync();
             return true;
         }
 
@@ -89,13 +107,12 @@ namespace HotelManagement.Repository.Implementation
         {
             var query = _context.Hotels.AsQueryable();
 
-            if (!string.IsNullOrEmpty(includeProperties))
-            {
-                foreach (var includeProp in includeProperties.Split(",", StringSplitOptions.RemoveEmptyEntries))
-                {
-                    query = query.Include(includeProp.Trim());
-                }
-            }
+            
+            query = query
+                .Include(h => h.Manager)
+                .Include(h => h.Rooms)
+                    .ThenInclude(r => r.Reservations)
+                        .ThenInclude(res => res.Guest);
 
             if (!string.IsNullOrWhiteSpace(country))
                 query = query.Where(h => h.Country == country);
@@ -106,7 +123,7 @@ namespace HotelManagement.Repository.Implementation
             if (rating.HasValue)
                 query = query.Where(h => h.Rating == rating);
 
-            return await query.ToListAsync();
+            return await query.AsNoTracking().ToListAsync();
         }
 
     }

@@ -20,37 +20,50 @@ namespace HotelManagement.Repository.Data
         public DbSet<Manager> Managers { get; set; }
         public DbSet<Guest> Guests { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
-        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        //public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // One-to-One: Hotel ↔ Manager
+            // 1:1 - Hotel ↔ Manager (One hotel has one manager, one manager manages one hotel)
             modelBuilder.Entity<Hotel>()
                 .HasOne(h => h.Manager)
                 .WithOne(m => m.Hotel)
                 .HasForeignKey<Hotel>(h => h.ManagerId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // One-to-Many: Hotel ↔ Rooms
+            // 1:M - Hotel ↔ Rooms (One hotel has many rooms, each room belongs to one hotel)
             modelBuilder.Entity<Room>()
                 .HasOne(r => r.Hotel)
                 .WithMany(h => h.Rooms)
-                .HasForeignKey(r => r.HotelId);
+                .HasForeignKey(r => r.HotelId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // ✅ One-to-Many: Room ↔ Reservations
+            // M:M - Hotel ↔ Reservation (Many hotels can have many reservations)
             modelBuilder.Entity<Hotel>()
-                  .HasMany(h => h.Reservations)
-                  .WithMany(r => r.Hotels)
-                  .UsingEntity(j => j.ToTable("HotelReservations"));
+                .HasMany(h => h.Reservations)
+                .WithMany(r => r.Hotels)
+                .UsingEntity<Dictionary<string, object>>(
+                    "HotelReservations",
+                    j => j.HasOne<Reservation>().WithMany().HasForeignKey("ReservationId"),
+                    j => j.HasOne<Hotel>().WithMany().HasForeignKey("HotelId"),
+                    j => j.ToTable("HotelReservations")
+                );
 
-            // Room ↔ Reservation one-to-many (optional)
+            // 1:M - Room ↔ Reservation (One room can have many reservations)
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Room)
                 .WithMany(r => r.Reservations)
                 .HasForeignKey(r => r.RoomId)
-                .OnDelete(DeleteBehavior.SetNull); // Allow nullable RoomId
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 1:M - Guest ↔ Reservation (One guest can have many reservations)
+            modelBuilder.Entity<Reservation>()
+                .HasOne(r => r.Guest)
+                .WithMany(g => g.Reservations)
+                .HasForeignKey(r => r.GuestId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
 

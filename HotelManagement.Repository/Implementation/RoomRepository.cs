@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HotelManagement.Models.Dtos.Room;
 using HotelManagement.Models.Entities;
 using HotelManagement.Repository.Abstraction;
 using HotelManagement.Repository.Data;
@@ -54,7 +55,9 @@ namespace HotelManagement.Repository.Implementation
 
             if (room == null) return false;
 
+
             bool hasActiveBookings = room.Reservations?.Any(r => r.IsAvailable) ?? false;
+
 
             if (hasActiveBookings) return false;
 
@@ -63,31 +66,46 @@ namespace HotelManagement.Repository.Implementation
             return true;
         }
 
-        public async Task<Room> GetByIdAsync(int id)
+        public async Task<Room> GetByIdAsync(int id, bool includeHotel = true, bool includeReservations = true)
         {
-            return await _context.Rooms
-                .Include(r => r.Hotel)
-                .Include(r => r.Reservations) 
+            var query = _context.Rooms.AsQueryable();
+
+            if (includeHotel)
+            {
+                query = query.Include(r => r.Hotel);
+            }
+
+            if (includeReservations)
+            {
+                query = query.Include(r => r.Reservations)
+                            .ThenInclude(res => res.Guest);
+            }
+
+            return await query
+                .AsNoTracking()
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task<IEnumerable<Room>> FilterRoomsAsync(int? hotelId, bool? isAvailable, decimal? minPrice, decimal? maxPrice)
         {
-            var query = _context.Rooms.AsQueryable();
+            var query = _context.Rooms
+                .Include(r => r.Hotel)          // Explicitly include Hotel
+                .Include(r => r.Reservations)   // Explicitly include Reservations
+                .AsQueryable();
 
             if (hotelId.HasValue)
-                query = query.Where(r => r.HotelId == hotelId);
+                query = query.Where(r => r.HotelId == hotelId.Value);
 
             if (isAvailable.HasValue)
-                query = query.Where(r => r.IsAvailable == isAvailable);
+                query = query.Where(r => r.IsAvailable == isAvailable.Value);
 
             if (minPrice.HasValue)
-                query = query.Where(r => r.Price >= minPrice);
+                query = query.Where(r => r.Price >= minPrice.Value);
 
             if (maxPrice.HasValue)
-                query = query.Where(r => r.Price <= maxPrice);
+                query = query.Where(r => r.Price <= maxPrice.Value);
 
-            return await query.ToListAsync();
+            return await query.AsNoTracking().ToListAsync();
         }
     }
 }

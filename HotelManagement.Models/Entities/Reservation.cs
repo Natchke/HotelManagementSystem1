@@ -21,7 +21,7 @@ namespace HotelManagement.Models.Entities
         public DateTime CheckOutDate { get; set; }
         public int RoomId { get; set; }
         public Room Room { get; set; }
-        public int GuestId { get; set; }
+        public string GuestId { get; set; }
         public Guest Guest { get; set; }
 
 

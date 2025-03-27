@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HotelManagement.Models.Dtos.Room;
 using HotelManagement.Models.Entities;
 
 namespace HotelManagement.Repository.Abstraction
@@ -12,7 +13,7 @@ namespace HotelManagement.Repository.Abstraction
         Task AddAsync(Room room);
         Task UpdateAsync(Room room);
         Task<bool> DeleteAsync(int roomId);
-        Task<Room> GetByIdAsync(int id);
+        Task<Room> GetByIdAsync(int id, bool includeHotel = true, bool includeReservations = true);
         Task<IEnumerable<Room>> FilterRoomsAsync(int? hotelId, bool? isAvailable, decimal? minPrice, decimal? maxPrice);
     }
 }

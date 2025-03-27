@@ -1,28 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HotelManagement.Models.Dtos.Managerr;
+using HotelManagement.Models.Dtos.Room;
 
 namespace HotelManagement.Models.Dtos.Hotel
 {
-    public  class HotelForCreatingDto
+    public  class HotelWitgReservationsDto
     {
-        [Required]
+        public int Id { get; set; }
         public string Name { get; set; }
-
-        [Range(1, 5)]
         public int Rating { get; set; }
-
-        [Required]
         public string Country { get; set; }
-
-        [Required]
         public string City { get; set; }
-
-        [Required]
         public string Address { get; set; }
-        public string? ManagerId { get; set; }
+
+        public ManagerDto Manager { get; set; }
+        public List<RoomWithReservationDto> Rooms { get; set; } = new List<RoomWithReservationDto>();
     }
 }

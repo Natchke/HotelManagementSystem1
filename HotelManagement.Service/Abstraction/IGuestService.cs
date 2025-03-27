@@ -11,6 +11,7 @@ namespace HotelManagement.Service.Abstraction
     {
         Task RegisterAsync(GuestRegistrationDto dto);
         Task UpdateAsync(GuesUpdatingDto dto);
-        Task<bool> DeleteAsync(int id);
+       //Task<List<GuestForGettingDto>> GetAllGuestsAsync();
+        Task<bool> DeleteAsync(string id);
     }
 }

@@ -74,8 +74,8 @@ namespace HotelManagement.Repository.Data
                 var hotel1 = new Hotel { Id = 1, Name = "Grand Hotel", Rating = 5, Country = "USA", City = "New York", Address = "123 Main St" };
                 var hotel2 = new Hotel { Id = 2, Name = "Sea View Resort", Rating = 4, Country = "Greece", City = "Santorini", Address = "456 Ocean Rd" };
 
-                var manager1 = new Manager { Id = 1, FirstName = "davit", LastName = "afxazishvili",  Email = "manager1@example.com",PersonalNumber="12345678901", MobileNumber = "123456789", Hotel = hotel1 };
-                var manager2 = new Manager { Id = 2, FirstName = "Anna", LastName = "kharebava",  Email = "manager2@example.com",PersonalNumber="11111111111", MobileNumber = "987654321", Hotel = hotel2 };
+                var manager1 = new Manager { Id = "1", FirstName = "davit", LastName = "afxazishvili",  Email = "manager1@example.com",PersonalNumber="12345678901", PhoneNumber = "123456789", Hotel = hotel1 };
+                var manager2 = new Manager { Id = "2", FirstName = "Anna", LastName = "kharebava",  Email = "manager2@example.com",PersonalNumber="11111111111", PhoneNumber = "987654321", Hotel = hotel2 };
 
                 var room1 = new Room { Id = 1, Name = "Deluxe Suite", IsAvailable = true, Price = 200, HotelId = 1 };
                 var room2 = new Room { Id = 2, Name = "Standard Room", IsAvailable = true, Price = 100, HotelId = 1 };

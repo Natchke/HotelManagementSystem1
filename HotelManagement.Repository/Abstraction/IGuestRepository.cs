@@ -11,8 +11,8 @@ namespace HotelManagement.Repository.Abstraction
     {
         Task<Guest> GetByPersonalNumberAsync(string personalNumber);
         Task<Guest> GetByMobileAsync(string mobile);
-        Task<Guest> GetByIdAsync(int id);
-        Task<bool> HasActiveReservationAsync(int guestId);
+        Task<Guest> GetByIdAsync(string id);
+        Task<bool> HasActiveReservationAsync(string guestId);
         Task SaveAsync();
     }
 }

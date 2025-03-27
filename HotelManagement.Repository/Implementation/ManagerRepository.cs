@@ -24,7 +24,7 @@ namespace HotelManagement.Repository.Implementation
         public async Task<Manager> GetByPersonalNumberAsync(string personalNumber) =>
             await _context.Managers.FirstOrDefaultAsync(m => m.PersonalNumber == personalNumber);
 
-        public async Task<Manager> GetByIdAsync(int id) =>
+        public async Task<Manager> GetByIdAsync(string id) =>
             await _context.Managers.FindAsync(id);
 
         public async Task<IEnumerable<Manager>> GetManagersByHotelAsync(int hotelId) =>
@@ -41,7 +41,7 @@ namespace HotelManagement.Repository.Implementation
                 existing.FirstName = manager.FirstName;
                 existing.LastName = manager.LastName;
                 existing.Email = manager.Email;
-                existing.MobileNumber = manager.MobileNumber;
+                existing.PhoneNumber = manager.PhoneNumber;
                 await _context.SaveChangesAsync();
             }
         }

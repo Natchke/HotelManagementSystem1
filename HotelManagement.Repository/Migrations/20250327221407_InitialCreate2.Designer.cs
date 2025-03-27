@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelManagement.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250325141721_InitialCreate1")]
-    partial class InitialCreate1
+    [Migration("20250327221407_InitialCreate2")]
+    partial class InitialCreate2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,6 +36,11 @@ namespace HotelManagement.Repository.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -92,35 +97,10 @@ namespace HotelManagement.Repository.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
 
-            modelBuilder.Entity("HotelManagement.Models.Entities.Guest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasDiscriminator().HasValue("ApplicationUser");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MobileNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Guests");
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("HotelManagement.Models.Entities.Hotel", b =>
@@ -143,8 +123,8 @@ namespace HotelManagement.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ManagerId")
-                        .HasColumnType("int");
+                    b.Property<string>("ManagerId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -156,49 +136,10 @@ namespace HotelManagement.Repository.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ManagerId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[ManagerId] IS NOT NULL");
 
                     b.ToTable("Hotels");
-                });
-
-            modelBuilder.Entity("HotelManagement.Models.Entities.Manager", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("HotelId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MobileNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PersonalNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Managers");
                 });
 
             modelBuilder.Entity("HotelManagement.Models.Entities.Reservation", b =>
@@ -215,13 +156,19 @@ namespace HotelManagement.Repository.Migrations
                     b.Property<DateTime>("CheckOutDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("GuestId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("RoomId")
+                    b.Property<int>("RoomId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GuestId");
 
                     b.HasIndex("RoomId");
 
@@ -256,17 +203,17 @@ namespace HotelManagement.Repository.Migrations
                     b.ToTable("Rooms");
                 });
 
-            modelBuilder.Entity("HotelReservation", b =>
+            modelBuilder.Entity("HotelReservations", b =>
                 {
-                    b.Property<int>("HotelsId")
+                    b.Property<int>("HotelId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReservationsId")
+                    b.Property<int>("ReservationId")
                         .HasColumnType("int");
 
-                    b.HasKey("HotelsId", "ReservationsId");
+                    b.HasKey("HotelId", "ReservationId");
 
-                    b.HasIndex("ReservationsId");
+                    b.HasIndex("ReservationId");
 
                     b.ToTable("HotelReservations", (string)null);
                 });
@@ -404,23 +351,86 @@ namespace HotelManagement.Repository.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("HotelManagement.Models.Entities.Guest", b =>
+                {
+                    b.HasBaseType("HotelManagement.Models.Entities.ApplicationUser");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PersonalNumber")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
+                    b.HasDiscriminator().HasValue("Guest");
+                });
+
+            modelBuilder.Entity("HotelManagement.Models.Entities.Manager", b =>
+                {
+                    b.HasBaseType("HotelManagement.Models.Entities.ApplicationUser");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("HotelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PersonalNumber")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
+                    b.ToTable("AspNetUsers", t =>
+                        {
+                            t.Property("FirstName")
+                                .HasColumnName("Manager_FirstName");
+
+                            t.Property("LastName")
+                                .HasColumnName("Manager_LastName");
+
+                            t.Property("PersonalNumber")
+                                .HasColumnName("Manager_PersonalNumber");
+                        });
+
+                    b.HasDiscriminator().HasValue("Manager");
+                });
+
             modelBuilder.Entity("HotelManagement.Models.Entities.Hotel", b =>
                 {
                     b.HasOne("HotelManagement.Models.Entities.Manager", "Manager")
                         .WithOne("Hotel")
                         .HasForeignKey("HotelManagement.Models.Entities.Hotel", "ManagerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Manager");
                 });
 
             modelBuilder.Entity("HotelManagement.Models.Entities.Reservation", b =>
                 {
+                    b.HasOne("HotelManagement.Models.Entities.Guest", "Guest")
+                        .WithMany("Reservations")
+                        .HasForeignKey("GuestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("HotelManagement.Models.Entities.Room", "Room")
                         .WithMany("Reservations")
                         .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guest");
 
                     b.Navigation("Room");
                 });
@@ -436,17 +446,17 @@ namespace HotelManagement.Repository.Migrations
                     b.Navigation("Hotel");
                 });
 
-            modelBuilder.Entity("HotelReservation", b =>
+            modelBuilder.Entity("HotelReservations", b =>
                 {
                     b.HasOne("HotelManagement.Models.Entities.Hotel", null)
                         .WithMany()
-                        .HasForeignKey("HotelsId")
+                        .HasForeignKey("HotelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HotelManagement.Models.Entities.Reservation", null)
                         .WithMany()
-                        .HasForeignKey("ReservationsId")
+                        .HasForeignKey("ReservationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -507,15 +517,20 @@ namespace HotelManagement.Repository.Migrations
                     b.Navigation("Rooms");
                 });
 
+            modelBuilder.Entity("HotelManagement.Models.Entities.Room", b =>
+                {
+                    b.Navigation("Reservations");
+                });
+
+            modelBuilder.Entity("HotelManagement.Models.Entities.Guest", b =>
+                {
+                    b.Navigation("Reservations");
+                });
+
             modelBuilder.Entity("HotelManagement.Models.Entities.Manager", b =>
                 {
                     b.Navigation("Hotel")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("HotelManagement.Models.Entities.Room", b =>
-                {
-                    b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618
         }

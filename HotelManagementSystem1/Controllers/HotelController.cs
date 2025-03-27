@@ -19,20 +19,22 @@ namespace HotelManagementSystem1.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateHotel([FromBody] HotelForCreatingDto dto)
         {
             await _hotelService.AddHotelAsync(dto);
-            var response = new ApiResponse("სასტუმრო წარმატებით დაემატა", dto, 201, true);
+            var response = new ApiResponse("Hotel Added Successfuly", dto, 201, true);
             return StatusCode(response.StatusCode, response);
         }
 
         [HttpPut]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateHotel([FromBody] HotelForUpdatingDto dto)
         {
             try
             {
                 await _hotelService.UpdateHotelAsync(dto);
-                var response = new ApiResponse("სასტუმრო განახლდა", dto, 200, true);
+                var response = new ApiResponse("Hotel Updated ", dto, 200, true);
                 return StatusCode(response.StatusCode, response);
             }
             catch (ArgumentException ex)
@@ -42,30 +44,32 @@ namespace HotelManagementSystem1.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteHotel([FromRoute] int id)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteHotel(int id)
         {
             var result = await _hotelService.DeleteHotelAsync(id);
-            if (!result)
-                return BadRequest(new ApiResponse("სასტუმროს წაშლა შეუძლებელია, გააჩნია აქტიური ოთახები ან ჯავშნები.", null, 400, false));
-
-            return StatusCode(204, new ApiResponse("წაშლა წარმატებით დასრულდა", null, 204, true));
+            return result.Success
+                ? Ok(result)
+                : BadRequest(result);
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetHotelById([FromRoute] int id)
         {
             var hotel = await _hotelService.GetHotelByIdAsync(id);
             if (hotel == null)
-                return NotFound(new ApiResponse("სასტუმრო ვერ მოიძებნა", null, 404, false));
+                return NotFound(new ApiResponse("Hotel Not Found", null, 404, false));
 
-            return Ok(new ApiResponse("სასტუმრო მოიძებნა", hotel, 200, true));
+            return Ok(new ApiResponse("Hotel Found", hotel, 200, true));
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetFilteredHotels([FromQuery] string country, [FromQuery] string city, [FromQuery] int? rating)
         {
             var hotels = await _hotelService.GetFilteredHotelsAsync(country, city, rating);
-            return Ok(new ApiResponse("სასტუმროების სია", hotels, 200, true));
+            return Ok(new ApiResponse("List Of Hotels", hotels, 200, true));
         }
     }
 }

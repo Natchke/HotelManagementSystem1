@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using HotelManagement.Models.Dtos.Identity;
+using HotelManagement.Models.Dtos.Manager;
 using HotelManagement.Models.Entities;
-using HotelManagement.Repository.Data;
+using HotelManagement.Repository.Abstraction;
 using HotelManagement.Service.Abstraction;
 using HotelManagement.Service.Exeptions;
 using Microsoft.AspNetCore.Identity;
@@ -14,101 +15,145 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HotelManagement.Service.Implementation
 {
-    public  class AuthService : IAuthService
+    public class AuthService : IAuthService
     {
-        private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
         private readonly IMapper _mapper;
-        private const string _adminRole = "Admin";
-        private const string _customerRole = "Customer";
+        private readonly IHotelRepository _hotelRepository;
 
-        public AuthService
-            (
-                ApplicationDbContext context,
-                UserManager<ApplicationUser> userManager,
-                RoleManager<IdentityRole> roleManager,
-                IJwtTokenGenerator jwtTokenGenerator,
-                IMapper mapper
-            )
+        private const string AdminRole = "Admin";
+        private const string UserRole = "User";
+        private const string ManagerRole = "Manager";
+
+        public AuthService(
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IJwtTokenGenerator jwtTokenGenerator,
+            IMapper mapper,
+            IHotelRepository hotelRepository)
         {
-            _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _jwtTokenGenerator = jwtTokenGenerator;
             _mapper = mapper;
+            _hotelRepository = hotelRepository;
         }
 
         public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
         {
-            var user = await _context.ApplicationUsers
-                .FirstOrDefaultAsync(x => x.UserName.ToLower().Trim() == loginRequestDto.UserName.ToLower().Trim());
+            var user = await _userManager.FindByNameAsync(loginRequestDto.UserName);
+            if (user == null)
+                throw new Exception($"User {loginRequestDto.UserName} not found");
 
-            if (user is not null)
+            var isValid = await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
+            if (!isValid)
+                return new LoginResponseDto { Token = string.Empty };
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var token = _jwtTokenGenerator.GenerateToken(user, roles);
+
+            return new LoginResponseDto { Token = token };
+        }
+
+        public async Task RegisterUser(RegistrationRequestDto registrationRequestDto)
+        {
+            await EnsureRoleExists(UserRole);
+
+            var existingUser = await _userManager.Users
+                .Where(u => u is Guest)
+                .Cast<Guest>()
+                .FirstOrDefaultAsync(u => u.PersonalNumber == registrationRequestDto.PersonalNumber);
+
+            if (existingUser != null)
             {
-                var isValid = await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
-
-                if (!isValid)
-                    return new LoginResponseDto() { Token = string.Empty };
-
-                var roles = await _userManager.GetRolesAsync(user);
-                var token = _jwtTokenGenerator.GenerateToken(user, roles);
-
-                LoginResponseDto result = new() { Token = token };
-                return result;
+                throw new InvalidOperationException("A user with this Personal Number already exists.");
             }
-            else
+
+            var user = new Guest
             {
-                throw new NotFoundException($"User {loginRequestDto.UserName} not found");
+                UserName = registrationRequestDto.Email,
+                Email = registrationRequestDto.Email,
+                PhoneNumber = registrationRequestDto.PhoneNumber,
+                FirstName = registrationRequestDto.FirstName,
+                LastName = registrationRequestDto.LastName,
+                PersonalNumber = registrationRequestDto.PersonalNumber
+            };
+
+            var result = await _userManager.CreateAsync(user, registrationRequestDto.Password);
+            if (!result.Succeeded)
+                throw new InvalidOperationException(result.Errors.FirstOrDefault()?.Description);
+
+            await _userManager.AddToRoleAsync(user, UserRole);
+        }
+
+        public async Task RegisterManager(ManagerRegistrationDto registrationRequestDto)
+        {
+            await EnsureRoleExists(ManagerRole);
+
+            var existingManager = await _userManager.Users
+                .Where(u => u is Manager)
+                .Cast<Manager>()
+                .FirstOrDefaultAsync(u => u.PersonalNumber == registrationRequestDto.PersonalNumber);
+
+            if (existingManager != null)
+            {
+                throw new InvalidOperationException("A manager with this Personal Number already exists.");
+            }
+
+            var user = new Manager
+            {
+                UserName = registrationRequestDto.Email,
+                Email = registrationRequestDto.Email,
+                PhoneNumber = registrationRequestDto.MobileNumber,
+                FirstName = registrationRequestDto.FirstName,
+                LastName = registrationRequestDto.LastName,
+                PersonalNumber = registrationRequestDto.PersonalNumber,
+                HotelId = registrationRequestDto.HotelId
+            };
+
+            var result = await _userManager.CreateAsync(user, registrationRequestDto.password);
+            if (!result.Succeeded)
+                throw new InvalidOperationException(result.Errors.FirstOrDefault()?.Description);
+
+            await _userManager.AddToRoleAsync(user, ManagerRole);
+
+            // Update the Hotel's ManagerId after successful manager registration
+            if (registrationRequestDto.HotelId != null)
+            {
+                var hotel = await _hotelRepository.GetAsync(h => h.Id == registrationRequestDto.HotelId);
+                if (hotel != null)
+                {
+                    hotel.ManagerId = user.Id;
+                    await _hotelRepository.SaveChangesAsync();
+                }
             }
         }
 
-        public async Task Register(RegistrationRequestDto registrationRequestDto)
+        public async Task RegisterAdmin(AdminRegistrationDto registrationRequestDto)
         {
-            var user = _mapper.Map<ApplicationUser>(registrationRequestDto);
+            await EnsureRoleExists(AdminRole);
+
+            var user = new ApplicationUser
+            {
+                UserName = registrationRequestDto.Email,
+                Email = registrationRequestDto.Email,
+                PhoneNumber = registrationRequestDto.PhoneNumber
+            };
+
             var result = await _userManager.CreateAsync(user, registrationRequestDto.Password);
+            if (!result.Succeeded)
+                throw new InvalidOperationException(result.Errors.FirstOrDefault()?.Description);
 
-            if (result.Succeeded)
-            {
-                var userToReturn = await _context.ApplicationUsers
-                    .FirstOrDefaultAsync(x => x.Email.ToLower().Trim() == registrationRequestDto.Email.ToLower().Trim());
-
-                if (userToReturn is not null)
-                {
-                    if (!await _roleManager.RoleExistsAsync(_customerRole))
-                        await _roleManager.CreateAsync(new IdentityRole(_customerRole));
-
-                    await _userManager.AddToRoleAsync(userToReturn, _customerRole);
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException(result.Errors.FirstOrDefault().Description);
-            }
+            await _userManager.AddToRoleAsync(user, AdminRole);
         }
 
-        public async Task RegisterAdmin(RegistrationRequestDto registrationRequestDto)
+        private async Task EnsureRoleExists(string roleName)
         {
-            var user = _mapper.Map<ApplicationUser>(registrationRequestDto);
-            var result = await _userManager.CreateAsync(user, registrationRequestDto.Password);
-
-            if (result.Succeeded)
+            if (!await _roleManager.RoleExistsAsync(roleName))
             {
-                var userToReturn = await _context.ApplicationUsers
-                    .FirstOrDefaultAsync(x => x.Email.ToLower().Trim() == registrationRequestDto.Email.ToLower().Trim());
-
-                if (userToReturn is not null)
-                {
-                    if (!await _roleManager.RoleExistsAsync(_adminRole))
-                        await _roleManager.CreateAsync(new IdentityRole(_adminRole));
-
-                    await _userManager.AddToRoleAsync(userToReturn, _adminRole);
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException(result.Errors.FirstOrDefault().Description);
+                await _roleManager.CreateAsync(new IdentityRole(roleName));
             }
         }
     }

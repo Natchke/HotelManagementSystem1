@@ -30,7 +30,7 @@ namespace HotelManagement.Service.Implementation
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Email = dto.Email,
-                MobileNumber = dto.MobileNumber,
+                PhoneNumber = dto.MobileNumber,
                 PersonalNumber = dto.PersonalNumber
             };
 
@@ -46,12 +46,12 @@ namespace HotelManagement.Service.Implementation
             guest.FirstName = dto.FirstName;
             guest.LastName = dto.LastName;
             guest.Email = dto.Email;
-            guest.MobileNumber = dto.MobileNumber;
+            guest.PhoneNumber = dto.MobileNumber;
 
             await _repo.SaveAsync();
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(string id)
         {
             var guest = await _repo.GetByIdAsync(id);
             if (guest == null) return false;
@@ -63,5 +63,7 @@ namespace HotelManagement.Service.Implementation
             await _repo.SaveAsync();
             return true;
         }
+
+       
     }
 }

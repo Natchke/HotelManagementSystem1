@@ -36,6 +36,10 @@ namespace HotelManagementSystem1
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+           
+    
+   
+
 
             // Register JWT Options from appsettings.json
             builder.Services.Configure<JwtOption>(
@@ -84,6 +88,7 @@ namespace HotelManagementSystem1
             builder.Services.AddScoped<IGuestRepository, GuestRepository>();
             builder.Services.AddScoped<IreservationService, ReservationService>();
             builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+
 
 
 

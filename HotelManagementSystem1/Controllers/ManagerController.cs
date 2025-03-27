@@ -1,5 +1,6 @@
 ﻿using HotelManagement.Models.Dtos.Manager;
 using HotelManagement.Service.Abstraction;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelManagementSystem1.Controllers
@@ -14,33 +15,24 @@ namespace HotelManagementSystem1.Controllers
         {
             _service = service;
         }
-
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] ManagerRegistrationDto dto)
-        {
-            var result = await _service.RegisterAsync(dto);
-            return Ok(result);
-        }
-
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] MangerLoginDto dto)
-        {
-            var result = await _service.LoginAsync(dto);
-            return Ok(result);
-        }
+       
 
         [HttpPut]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Update([FromBody] ManagerUpdatingDto dto)
         {
-            await _service.UpdateAsync(dto);
-            return Ok("Manager updated.");
+            await _service.UpdateAsync(dto); 
+            return Ok(new ApiResponse("Manager updated successfully.", null, 200, true));
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Delete(string id)
         {
-            await _service.DeleteAsync(id);
-            return Ok("Manager deleted.");
+            var success = await _service.DeleteAsync(id);
+            return success
+                ? Ok(new ApiResponse("Manager deleted successfully.", null, 200, true))
+                : NotFound(new ApiResponse("Manager not found.", null, 404, false));
         }
     }
 }

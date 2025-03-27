@@ -9,11 +9,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace HotelManagement.Models.Entities
 {
-    public class Guest
+    public class Guest : ApplicationUser
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        //[Key]
+        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 
         [Required]
         public string FirstName { get; set; }
@@ -21,16 +20,13 @@ namespace HotelManagement.Models.Entities
         [Required]
         public string LastName { get; set; }
 
-        [Required, EmailAddress]
-        public string Email { get; set; }
+        
         [Required,MaxLength(11)]
         public string PersonalNumber { get; set; }
 
 
-        [Required]
-        public string MobileNumber { get; set; }
+        
         public ICollection<Reservation> Reservations { get; set; }
-       // public string? RefreshToken { get; set; }
-       // public DateTime? RefreshTokenExpiryTime { get; set; }
+      
     }
 }

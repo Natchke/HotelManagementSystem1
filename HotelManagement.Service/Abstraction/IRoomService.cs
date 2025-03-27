@@ -13,8 +13,8 @@ namespace HotelManagement.Service.Abstraction
         Task AddRoomAsync(RoomForCreatingDto dto);
         Task UpdateRoomAsync(RoomForUpdatingDto dto);
         Task<bool> DeleteRoomAsync(int id);
-        Task<Room> GetRoomByIdAsync(int id);
-        Task<IEnumerable<Room>> FilterRoomsAsync(int? hotelId, bool? isAvailable, decimal? minPrice, decimal? maxPrice);
+        Task<RoomDto> GetRoomByIdAsync(int id);
+        Task<IEnumerable<RoomDto>> FilterRoomsAsync(int? hotelId, bool? isAvailable, decimal? minPrice, decimal? maxPrice);
 
     }
 }

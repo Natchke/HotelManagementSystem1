@@ -74,7 +74,7 @@ namespace HotelManagement.Repository.Implementation
                 .ToListAsync();
         }
 
-        public async Task<T> GetAllAsync(Expression<Func<T, bool>> filter, string includeProperties = null)
+        public async Task<T> GetAsync(Expression<Func<T, bool>> filter, string includeProperties = null)
         {
             IQueryable<T> query = _dbset;
 
@@ -88,6 +88,15 @@ namespace HotelManagement.Repository.Implementation
 
             return await query.FirstOrDefaultAsync(filter);
 
+        }
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+
+            foreach (var entity in _context.ChangeTracker.Entries<T>().Where(e => e.State == EntityState.Modified))
+            {
+                _context.Entry(entity.Entity).Reload();
+            }
         }
 
         public async Task AddAsync(T entity) => await _dbset.AddAsync(entity);

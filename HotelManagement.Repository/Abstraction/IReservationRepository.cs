@@ -11,7 +11,8 @@ namespace HotelManagement.Repository.Abstraction
     {
         Task<bool> IsRoomAvailable(int roomId, DateTime checkIn, DateTime checkOut);
         Task<Reservation> GetByIdAsync(int id);
-        Task<IEnumerable<Reservation>> SearchAsync(int? hotelId, int? guestId, int? roomId, DateTime? from, DateTime? to, bool? active);
+
+        Task<IEnumerable<Reservation>> SearchAsync(int? hotelId, string? guestId, int? roomId, DateTime? from, DateTime? to, bool? active);
         Task SaveAsync();
     }
 }

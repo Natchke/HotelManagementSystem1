@@ -22,13 +22,13 @@ namespace HotelManagement.Repository.Implementation
             await _context.Guests.FirstOrDefaultAsync(g => g.PersonalNumber == personalNumber);
 
         public async Task<Guest> GetByMobileAsync(string mobile) =>
-            await _context.Guests.FirstOrDefaultAsync(g => g.MobileNumber == mobile);
+            await _context.Guests.FirstOrDefaultAsync(g => g.PhoneNumber == mobile);
 
-        public async Task<Guest> GetByIdAsync(int id) =>
+        public async Task<Guest> GetByIdAsync(string id) =>
             await _context.Guests.FindAsync(id);
 
-        public async Task<bool> HasActiveReservationAsync(int guestId) =>
-            await _context.Reservations.AnyAsync(r => r.Id == guestId && r.CheckOutDate >= DateTime.Today);
+        public async Task<bool> HasActiveReservationAsync(string guestId) =>
+            await _context.Reservations.AnyAsync(r => r.GuestId == guestId && r.CheckOutDate >= DateTime.Today);
 
         public async Task SaveAsync() => await _context.SaveChangesAsync();
 

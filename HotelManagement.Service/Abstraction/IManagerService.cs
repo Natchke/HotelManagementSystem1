@@ -9,9 +9,8 @@ namespace HotelManagement.Service.Abstraction
 {
     public interface IManagerService
     {
-        Task<string> RegisterAsync(ManagerRegistrationDto dto);
-        Task<string> LoginAsync(MangerLoginDto dto);
+        
         Task UpdateAsync(ManagerUpdatingDto dto);
-        Task<bool> DeleteAsync(int id);
+        Task<bool> DeleteAsync(string id);
     }
 }

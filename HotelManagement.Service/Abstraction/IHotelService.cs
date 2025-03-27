@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HotelManagement.Models.Dtos.Delete;
 using HotelManagement.Models.Dtos.Hotel;
 using HotelManagement.Models.Entities;
 
@@ -12,8 +13,8 @@ namespace HotelManagement.Service.Abstraction
     {
         Task AddHotelAsync(HotelForCreatingDto dto);
         Task UpdateHotelAsync(HotelForUpdatingDto dto);
-        Task<bool> DeleteHotelAsync(int id);
-        Task<HotelDTO> GetHotelByIdAsync(int id);
-        Task<IEnumerable<HotelDTO>> GetFilteredHotelsAsync(string country, string city, int? rating);
+        Task<DeleteResultDto> DeleteHotelAsync(int id);
+        Task<HotelWitgReservationsDto> GetHotelByIdAsync(int id);
+        Task<IEnumerable<HotelWitgReservationsDto>> GetFilteredHotelsAsync(string country, string city, int? rating);
     }
 }

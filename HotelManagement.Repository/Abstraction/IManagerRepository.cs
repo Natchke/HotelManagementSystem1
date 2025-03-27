@@ -11,7 +11,7 @@ namespace HotelManagement.Repository.Abstraction
     {
         Task<Manager> GetByEmailAsync(string email);
         Task<Manager> GetByPersonalNumberAsync(string personalNumber);
-        Task<Manager> GetByIdAsync(int id);
+        Task<Manager> GetByIdAsync(string id);
         Task<IEnumerable<Manager>> GetManagersByHotelAsync(int hotelId);
         Task UpdatePartialAsync(Manager manager);
         Task SaveAsync();

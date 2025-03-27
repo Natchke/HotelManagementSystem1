@@ -23,8 +23,8 @@ namespace HotelManagement.Models.Dtos.Hotel
 
         public ManagerDto Manager { get; set; }
 
-        public List<RoomDto> Rooms { get; set; }
-        public List<ReservationDto> Reservations { get; set; }
+        public List<RoomDto> Rooms { get; set; } = new List<RoomDto>(); 
+        public List<ReservationDto> Reservations { get; set; } = new List<ReservationDto>();
 
 
     }

@@ -1,11 +1,13 @@
 ﻿using HotelManagement.Models.Dtos.Room;
 using HotelManagement.Service.Abstraction;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelManagementSystem1.Controllers
 {
     [ApiController]
     [Route("api/Hotel/rooms")]
+    [Authorize]
     public class RoomController : ControllerBase
     {
         private readonly IRoomService _roomService;
@@ -16,6 +18,7 @@ namespace HotelManagementSystem1.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Create([FromBody] RoomForCreatingDto dto)
         {
             await _roomService.AddRoomAsync(dto);
@@ -23,6 +26,7 @@ namespace HotelManagementSystem1.Controllers
         }
 
         [HttpPut]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Update([FromBody] RoomForUpdatingDto dto)
         {
             await _roomService.UpdateRoomAsync(dto);
@@ -43,17 +47,22 @@ namespace HotelManagementSystem1.Controllers
         public async Task<IActionResult> Get(int id)
         {
             var room = await _roomService.GetRoomByIdAsync(id);
-            if (room == null)
+            if (room .Id== null)
                 return NotFound(new ApiResponse("Room not found", null, 404, false));
 
             return Ok(new ApiResponse("Room found", room, 200, true));
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> Filter([FromQuery] int? hotelId, [FromQuery] bool? isAvailable, [FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)
+        public async Task<IActionResult> Filter(
+               [FromQuery] int? hotelId,
+               [FromQuery] bool? isAvailable,
+               [FromQuery] decimal? minPrice,
+               [FromQuery] decimal? maxPrice)
         {
             var rooms = await _roomService.FilterRoomsAsync(hotelId, isAvailable, minPrice, maxPrice);
-            return Ok(new ApiResponse("Filtered rooms", rooms, 200, true));
+            return Ok(new ApiResponse("Rooms retrieved successfully", rooms, 200, true));
         }
 
 
