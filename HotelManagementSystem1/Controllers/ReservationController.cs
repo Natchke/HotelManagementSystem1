@@ -63,5 +63,13 @@ namespace HotelManagementSystem1.Controllers
             var results = await _service.SearchAsync(hotelId, guestId, roomId, from, to, active);
             return Ok(new ApiResponse("Reservations retrieved successfully.", results, 200, true));
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllReservations()
+        {
+            var reservations = await _service.GetAllReservationsAsync();
+            return Ok(new ApiResponse("Reservations retrieved successfully", reservations, 200, true));
+        }
+
     }
 }

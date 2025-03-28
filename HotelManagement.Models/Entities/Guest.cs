@@ -11,8 +11,7 @@ namespace HotelManagement.Models.Entities
 {
     public class Guest : ApplicationUser
     {
-        //[Key]
-        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        
 
         [Required]
         public string FirstName { get; set; }

@@ -26,7 +26,7 @@ namespace HotelManagement.Models.Entities
 
        
 
-        // One-to-One with Hotel
+        
         public int HotelId { get; set; }
         public Hotel Hotel { get; set; }
     }

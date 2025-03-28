@@ -19,21 +19,21 @@ namespace HotelManagement.Repository.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // 1:1 Hotel ↔ Manager
+            // 1:1 
             modelBuilder.Entity<Hotel>()
                 .HasOne(h => h.Manager)
                 .WithOne(m => m.Hotel)
                 .HasForeignKey<Hotel>(h => h.ManagerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // 1:M Hotel ↔ Rooms
+            // 1:M 
             modelBuilder.Entity<Room>()
                 .HasOne(r => r.Hotel)
                 .WithMany(h => h.Rooms)
                 .HasForeignKey(r => r.HotelId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // M:M Hotel ↔ Reservations (through join table)
+            // M:M sastumroebi da javshnebi 
             modelBuilder.Entity<Hotel>()
                 .HasMany(h => h.Reservations)
                 .WithMany(r => r.Hotels)
@@ -43,14 +43,14 @@ namespace HotelManagement.Repository.Data
                     j => j.HasOne<Hotel>().WithMany().OnDelete(DeleteBehavior.Restrict),
                     j => j.ToTable("HotelReservations"));
 
-            // 1:M Room ↔ Reservations (corrected)
+            // 1:M otaxi ↔ javshani (corrected)
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Room)
                 .WithMany(r => r.Reservations)
                 .HasForeignKey(r => r.RoomId)
-                .OnDelete(DeleteBehavior.Restrict); // Changed from Cascade
+                .OnDelete(DeleteBehavior.Restrict); 
 
-            // 1:M Guest ↔ Reservations
+            // 1:M gesti da javshani
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Guest)
                 .WithMany(g => g.Reservations)

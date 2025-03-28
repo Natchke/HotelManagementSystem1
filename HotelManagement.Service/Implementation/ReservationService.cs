@@ -81,14 +81,14 @@ namespace HotelManagement.Service.Implementation
 
         public async Task<IEnumerable<ReservationDto>> SearchAsync(int? hotelId, string guestId, int? roomId, DateTime? from, DateTime? to, bool? active)
         {
-            // First get the base query with all necessary includes
+           
             var query = _context.Reservations
-                .Include(r => r.Guest)  // Ensure guest is included
-                .Include(r => r.Room)   // Ensure room is included
-                    .ThenInclude(room => room.Hotel)  // Include hotel through room
+                .Include(r => r.Guest)  
+                .Include(r => r.Room)   
+                    .ThenInclude(room => room.Hotel)  
                 .AsQueryable();
 
-            // Apply filters
+            
             if (hotelId.HasValue)
             {
                 query = query.Where(r => r.Room != null && r.Room.HotelId == hotelId.Value);
@@ -143,6 +143,29 @@ namespace HotelManagement.Service.Implementation
                 IsActive = r.IsAvailable
             }).ToList();
         }
+        public async Task<IEnumerable<ReservationDto>> GetAllReservationsAsync()
+        {
+            var reservations = await _context.Reservations
+                .Include(r => r.Guest)
+                .Include(r => r.Room)
+                    .ThenInclude(room => room.Hotel)
+                .ToListAsync();
+
+            return reservations.Select(r => new ReservationDto
+            {
+                Id = r.Id,
+                CheckInDate = r.CheckInDate,
+                CheckOutDate = r.CheckOutDate,
+                GuestName = r.Guest != null ? $"{r.Guest.FirstName} {r.Guest.LastName}" : "Unknown Guest",
+                GuestId = r.GuestId,
+                RoomId = r.RoomId,
+                RoomName = r.Room?.Name ?? "Unknown Room",
+                HotelId = r.Room?.HotelId,
+                HotelName = r.Room?.Hotel?.Name ?? "Unknown Hotel",
+                IsActive = r.IsAvailable
+            }).ToList();
+        }
+
 
     }
 }

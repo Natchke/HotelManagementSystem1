@@ -29,6 +29,8 @@ namespace HotelManagement.Repository.Implementation
 
         public async Task<bool> HasActiveReservationAsync(string guestId) =>
             await _context.Reservations.AnyAsync(r => r.GuestId == guestId && r.CheckOutDate >= DateTime.Today);
+        public async Task<IEnumerable<Guest>> GetAllAsync()=> await _context.Guests.ToListAsync();
+        
 
         public async Task SaveAsync() => await _context.SaveChangesAsync();
 

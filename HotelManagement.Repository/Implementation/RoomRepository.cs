@@ -89,8 +89,8 @@ namespace HotelManagement.Repository.Implementation
         public async Task<IEnumerable<Room>> FilterRoomsAsync(int? hotelId, bool? isAvailable, decimal? minPrice, decimal? maxPrice)
         {
             var query = _context.Rooms
-                .Include(r => r.Hotel)          // Explicitly include Hotel
-                .Include(r => r.Reservations)   // Explicitly include Reservations
+                .Include(r => r.Hotel)          
+                .Include(r => r.Reservations)   
                 .AsQueryable();
 
             if (hotelId.HasValue)

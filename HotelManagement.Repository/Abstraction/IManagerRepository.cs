@@ -15,6 +15,9 @@ namespace HotelManagement.Repository.Abstraction
         Task<IEnumerable<Manager>> GetManagersByHotelAsync(int hotelId);
         Task UpdatePartialAsync(Manager manager);
         Task SaveAsync();
+        Task<IEnumerable<Manager>> GetAllAsync();
+        
+
     }
 }
 

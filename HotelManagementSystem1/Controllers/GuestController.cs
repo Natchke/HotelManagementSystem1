@@ -17,14 +17,14 @@ namespace HotelManagementSystem1.Controllers
         {
             _service = service;
         }
-        //[HttpGet]
-        //[Authorize(Roles = "Admin,Manager")]
-        //public async Task<IActionResult> GetAllGuests()
-        //{
-        //    var guests = await _service.GetAllGuestsAsync();
-        //    var response = new ApiResponse<IEnumerable<GuestForGettingDto>>(guests, (int)HttpStatusCode.OK, true);
-        //    return Ok(response);
-        //}
+
+        [HttpGet]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> GetAllGuests()
+        {
+            var guests = await _service.GetAllAsync();
+            return Ok(new ApiResponse("Guests retrieved successfully", guests, 200, true));
+        }
 
         [HttpPost("register")]
         [Authorize(Roles = "Admin,Manager")]

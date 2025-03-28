@@ -41,7 +41,7 @@ namespace HotelManagement.Service.Implementation
             _hotelRepository = hotelRepository;
         }
 
-        public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
+        public async Task<LoginResponseDto?> Login(LoginRequestDto loginRequestDto)
         {
             var user = await _userManager.FindByNameAsync(loginRequestDto.UserName);
             if (user == null)
@@ -49,13 +49,14 @@ namespace HotelManagement.Service.Implementation
 
             var isValid = await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
             if (!isValid)
-                return new LoginResponseDto { Token = string.Empty };
+                return null; 
 
             var roles = await _userManager.GetRolesAsync(user);
             var token = _jwtTokenGenerator.GenerateToken(user, roles);
 
             return new LoginResponseDto { Token = token };
         }
+
 
         public async Task RegisterUser(RegistrationRequestDto registrationRequestDto)
         {
@@ -119,7 +120,7 @@ namespace HotelManagement.Service.Implementation
 
             await _userManager.AddToRoleAsync(user, ManagerRole);
 
-            // Update the Hotel's ManagerId after successful manager registration
+           
             if (registrationRequestDto.HotelId != null)
             {
                 var hotel = await _hotelRepository.GetAsync(h => h.Id == registrationRequestDto.HotelId);

@@ -15,6 +15,8 @@ namespace HotelManagement.Service.Abstraction
         Task UpdateHotelAsync(HotelForUpdatingDto dto);
         Task<DeleteResultDto> DeleteHotelAsync(int id);
         Task<HotelWitgReservationsDto> GetHotelByIdAsync(int id);
-        Task<IEnumerable<HotelWitgReservationsDto>> GetFilteredHotelsAsync(string country, string city, int? rating);
+       
+    
+    Task<IEnumerable<HotelWitgReservationsDto>> GetFilteredHotelsAsync(string country, string city, int? rating);
     }
 }

@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using HotelManagement.Models.Dtos.Manager;
+using HotelManagement.Models.Dtos.Managerr;
 using HotelManagement.Models.Entities;
 using HotelManagement.Repository.Abstraction;
 using HotelManagement.Service.Abstraction;
@@ -23,9 +24,37 @@ namespace HotelManagement.Service.Implementation
             _repo = repo;
         }
 
-        
+        public async Task<IEnumerable<ManagerDto>> GetAllManagersAsync()
+        {
+            var managers = await _repo.GetAllAsync();
+            return managers.Select(m => new ManagerDto
+            {
+                Id = m.Id,
+                FirstName = m.FirstName,
+                LastName = m.LastName,
+                Email = m.Email,
+                MobileNumber = m.PhoneNumber,
+                
+            }).ToList();
+        }
 
-        
+        public async Task<ManagerDto?> GetManagerByIdAsync(string id)
+        {
+            var manager = await _repo.GetByIdAsync(id);
+            if (manager == null) return null;
+
+            return new ManagerDto
+            {
+                Id = manager.Id,
+                FirstName = manager.FirstName,
+                LastName = manager.LastName,
+                Email = manager.Email,
+                MobileNumber = manager.PhoneNumber,
+                
+            };
+        }
+
+
         public async Task UpdateAsync(ManagerUpdatingDto dto)
         {
             var manager = await _repo.GetByIdAsync(dto.Id);

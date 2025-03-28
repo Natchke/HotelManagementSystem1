@@ -25,7 +25,7 @@ namespace HotelManagement.Models.Entities
         public Guest Guest { get; set; }
 
 
-        // Many-to-Many with Hotels
+        
         public List<Hotel> Hotels { get; set; }
         public bool IsAvailable { get; set; }
 

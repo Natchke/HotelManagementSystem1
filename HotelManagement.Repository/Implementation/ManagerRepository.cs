@@ -32,6 +32,10 @@ namespace HotelManagement.Repository.Implementation
 
 
         public async Task SaveAsync() => await _context.SaveChangesAsync();
+        public async Task<IEnumerable<Manager>> GetAllAsync() => await _context.Managers.ToListAsync();
+
+
+
 
         public async Task UpdatePartialAsync(Manager manager)
         {

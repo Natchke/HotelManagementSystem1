@@ -156,6 +156,8 @@ namespace HotelManagement.Service.Implementation
                 }).ToList() ?? new List<RoomWithReservationDto>()
             }).ToList();
         }
+        
+        
 
         public async Task<DeleteResultDto> DeleteHotelAsync(int id)
         {

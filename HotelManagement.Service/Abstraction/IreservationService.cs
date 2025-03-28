@@ -13,6 +13,7 @@ namespace HotelManagement.Service.Abstraction
         Task CreateAsync(ReservationCreateDto dto);
         Task UpdateAsync(ReservationUpdateDto dto);
         Task CancelAsync(int id);
+        Task<IEnumerable<ReservationDto>> GetAllReservationsAsync();
 
         Task<IEnumerable<ReservationDto>> SearchAsync(int? hotelId, string guestId, int? roomId, DateTime? from, DateTime? to, bool? active);
     }

@@ -14,6 +14,6 @@ namespace HotelManagement.Models.Dtos.Guest
         public string PersonalNumber { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
-        //public IEnumerable<ReservationForGuestsDto> Reservations { get; set; }
+       
     }
 }

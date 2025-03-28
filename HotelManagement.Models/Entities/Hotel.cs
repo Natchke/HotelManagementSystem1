@@ -28,14 +28,14 @@ namespace HotelManagement.Models.Entities
         [Required]
         public string Address { get; set; }
 
-        // One-to-One with Manager
+        
         public string? ManagerId { get; set; }
         public virtual Manager Manager { get; set; }
 
-        // One-to-Many with Room
+       
         public List<Room> Rooms { get; set; }
 
-        // Many-to-Many with Reservation
+        
         public List<Reservation> Reservations { get; set; }
 
     }

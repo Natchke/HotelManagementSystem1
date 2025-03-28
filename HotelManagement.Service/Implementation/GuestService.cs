@@ -17,6 +17,21 @@ namespace HotelManagement.Service.Implementation
         {
             _repo = repo;
         }
+        public async Task<IEnumerable<GuestDto>> GetAllAsync()
+        {
+            var guests = await _repo.GetAllAsync();
+
+            return guests.Select(g => new GuestDto
+            {
+                Id = g.Id,
+                FirstName = g.FirstName,
+                LastName = g.LastName,
+                Email = g.Email,
+                MobileNumber = g.PhoneNumber,
+                PersonalNumber = g.PersonalNumber
+            }).ToList();
+        }
+
 
         public async Task RegisterAsync(GuestRegistrationDto dto)
         {

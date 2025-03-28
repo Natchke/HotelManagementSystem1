@@ -18,14 +18,17 @@ namespace HotelManagementSystem1.Controllers
             _hotelService = hotelService;
         }
 
+
+
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateHotel([FromBody] HotelForCreatingDto dto)
         {
             await _hotelService.AddHotelAsync(dto);
             var response = new ApiResponse("Hotel Added Successfuly", dto, 201, true);
             return StatusCode(response.StatusCode, response);
         }
+
 
         [HttpPut]
         [Authorize(Roles = "Admin,Manager")]

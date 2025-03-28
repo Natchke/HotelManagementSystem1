@@ -35,7 +35,7 @@ namespace HotelManagement.Repository.Implementation
         {
             var query = _context.Reservations
                 .Include(r => r.Room)
-                    .ThenInclude(room => room.Hotel) // Ensure Hotel is loaded
+                    .ThenInclude(room => room.Hotel) 
                 .Include(r => r.Guest)
                 .AsQueryable();
 
@@ -58,11 +58,11 @@ namespace HotelManagement.Repository.Implementation
             {
                 var today = DateTime.Today;
                 query = active.Value
-                    ? query.Where(r => r.CheckOutDate >= today) // Active reservations
-                    : query.Where(r => r.CheckOutDate < today); // Inactive reservations
+                    ? query.Where(r => r.CheckOutDate >= today) 
+                    : query.Where(r => r.CheckOutDate < today); 
             }
 
-            // Log the SQL query for debugging
+            
             Console.WriteLine(query.ToQueryString());
 
             var results = await query.ToListAsync();
